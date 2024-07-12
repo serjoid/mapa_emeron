@@ -9,7 +9,7 @@ def configurar_genai(api_key: str):
 
 # Inicializa a configuração do banco de dados e o modelo de geração de conteúdo
 db = Database()  # Crie a instância da classe Database aqui, fora de qualquer função
-model = configurar_genai(api_key="AIzaSyDJyyS98jjloqMKgpXfPj4jL1FskXCr1jY")  # Substitua pela sua chave API
+model = configurar_genai(api_key="SUA_API_KEY")  # Substitua pela sua chave API
 
 def gerar_insights_iniciais(page: ft.Page):
     """Gera insights iniciais com base nos dados do banco de dados."""
