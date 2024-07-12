@@ -1,9 +1,10 @@
 import flet as ft
 from database import Database
 
+# Inicializa a conexão com o banco de dados
 db = Database()
 
-# Definindo uma lista de cores
+# Define uma lista de cores para os gráficos
 CORES = [
     ft.colors.BLUE,
     ft.colors.RED,
@@ -21,34 +22,42 @@ CORES = [
     ft.colors.TEAL
 ]
 
+# Define a função para exibir a tela inicial
 def tela_inicial(page: ft.Page):
-    # Calcula os dados
-    alunos = [aluno for aluno in db.get_aluno() if " (2)" not in aluno]
-    num_alunos = len(alunos)
-    num_cursos = len(db.get_curso())
-    num_orientadores = len(db.get_orientador())
+    """
+    Cria a tela inicial com informações sobre alunos, orientadores e cursos.
 
-    # Informações textuais em cards separados
+    Args:
+        page (ft.Page): A página Flet atual.
+    """
+
+    # Calcula a quantidade de alunos, cursos e orientadores
+    alunos = [aluno for aluno in db.get_aluno() if " (2)" not in aluno]  # Obtém a lista de alunos, excluindo duplicatas
+    num_alunos = len(alunos)  # Calcula o número de alunos
+    num_cursos = len(db.get_curso())  # Calcula o número de cursos
+    num_orientadores = len(db.get_orientador())  # Calcula o número de orientadores
+
+    # Cria os cards com as informações textuais
     info_cards = ft.ResponsiveRow(
         controls=[
-            ft.Card(  # Card 1
+            ft.Card(  # Card para o número de alunos
                 content=
                 ft.Column(
                     [
-                        ft.Text("Alunos", style=ft.TextStyle(size=14, color=ft.colors.WHITE)),
-                        ft.Text(f"{num_alunos}", style=ft.TextStyle(size=18, color=ft.colors.WHITE, weight=ft.FontWeight.W_500)), 
+                        ft.Text("Alunos", style=ft.TextStyle(size=14, color=ft.colors.WHITE)),  # Título do card
+                        ft.Text(f"{num_alunos}", style=ft.TextStyle(size=18, color=ft.colors.WHITE, weight=ft.FontWeight.W_500)),  # Valor do número de alunos
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    alignment=ft.MainAxisAlignment.CENTER,  # Alinhamento vertical do conteúdo
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Alinhamento horizontal do conteúdo
                     height=70,
                     width=200,
-                    spacing=2,
+                    spacing=2,  # Espaçamento entre os elementos
                 ),
-                color="#006BA0",
-                margin=10,
+                color="#006BA0",  # Cor de fundo do card
+                margin=10,  # Margem do card
                 col={"sm": 4},  # Ocupa 4 colunas em telas médias e maiores
             ),
-            ft.Card(  # Card 2
+            ft.Card(  # Card para o número de orientadores (estrutura similar ao card de alunos)
                 content=ft.Column(
                     [
                         ft.Text("Orientadores", style=ft.TextStyle(size=14, color=ft.colors.WHITE)),
@@ -62,13 +71,13 @@ def tela_inicial(page: ft.Page):
                 ),
                 color="#006BA0",
                 margin=10,
-                col={"sm": 4},  # Ocupa 4 colunas em telas médias e maiores
+                col={"sm": 4},
             ),
-            ft.Card(  # Card 3
+            ft.Card(  # Card para o número de cursos (estrutura similar ao card de alunos)
                 content=ft.Column(
                     [
                         ft.Text("Cursos", style=ft.TextStyle(size=14, color=ft.colors.WHITE)),
-                        ft.Text(f"{num_cursos}", style=ft.TextStyle(size=18, color=ft.colors.WHITE, weight=ft.FontWeight.W_500)), # Fonte bold
+                        ft.Text(f"{num_cursos}", style=ft.TextStyle(size=18, color=ft.colors.WHITE, weight=ft.FontWeight.W_500)),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -78,63 +87,61 @@ def tela_inicial(page: ft.Page):
                 ),
                 color="#006BA0",
                 margin=10,
-                col={"sm": 4},  # Ocupa 4 colunas em telas médias e maiores
+                col={"sm": 4},
             ),
         ],
-        alignment=ft.MainAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.CENTER,  # Alinhamento horizontal dos cards
         width=1200,  # Largura máxima dos cards
     )
     
-    # Dados para o pie chart 1 (Alunos Ativos por Curso)
-    dados_pie_chart_1 = db.get_alunos_por_curso()
+    # Obtém os dados para os gráficos de pizza
+    dados_pie_chart_1 = db.get_alunos_por_curso()  # Obtém os dados de alunos por curso
+    dados_pie_chart_2 = db.get_alunos_por_fase_pesquisa()  # Obtém os dados de alunos por fase da pesquisa
 
-    # Dados para o pie chart 2 (Fases de Pesquisa)
-    dados_pie_chart_2 = db.get_alunos_por_fase_pesquisa()
-
-    # Pie chart 1: Alunos Ativos por Curso
+    # Cria o gráfico de pizza 1: Alunos Ativos por Curso
     pie_chart_1 = ft.Container(
         content=ft.Column(
             controls=[
-                ft.Text("Alunos por Curso", style=ft.TextStyle(size=18)),
+                ft.Text("Alunos por Curso", style=ft.TextStyle(size=18)),  # Título do gráfico
                 ft.PieChart(
                     sections=[
                         ft.PieChartSection(
-                            value,
-                            color=CORES[i % len(CORES)],
-                            border_side=ft.border.BorderSide(width=0),
-                            radius=100
+                            value,  # Valor da seção
+                            color=CORES[i % len(CORES)],  # Define a cor da seção usando a lista CORES
+                            border_side=ft.border.BorderSide(width=0),  # Remove a borda da seção
+                            radius=100  # Define o raio do gráfico
                         )
-                        for i, (label, value) in enumerate(dados_pie_chart_1)
+                        for i, (label, value) in enumerate(dados_pie_chart_1)  # Itera sobre os dados do gráfico
                     ],
-                    center_space_radius=0,
+                    center_space_radius=0,  # Define o raio do espaço central do gráfico como 0
                 ),
-                ft.Column(  # Coluna para a legenda do gráfico 1
+                ft.Column(  # Coluna para a legenda do gráfico
                     controls=[
-                        ft.Row(
+                        ft.Row(  # Linha para cada item da legenda
                             controls=[
-                                ft.Container(
+                                ft.Container(  # Container para a cor da legenda
                                     width=10,
                                     height=10,
-                                    bgcolor=CORES[i % len(CORES)],
+                                    bgcolor=CORES[i % len(CORES)],  # Define a cor da legenda usando a lista CORES
                                 ),
-                                ft.Text(f"{label}: {value}", style=ft.TextStyle(size=14)),
+                                ft.Text(f"{label}: {value}", style=ft.TextStyle(size=14)),  # Texto da legenda
                             ]
                         )
-                        for i, (label, value) in enumerate(dados_pie_chart_1)
+                        for i, (label, value) in enumerate(dados_pie_chart_1)  # Itera sobre os dados do gráfico
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER,  # Centraliza a legenda
+                    alignment=ft.MainAxisAlignment.CENTER,  # Alinhamento vertical da legenda
                 ),
             ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Centraliza todo o conteúdo do gráfico
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Alinhamento horizontal do conteúdo do gráfico
         ),
         width=400,
         height=600,
         padding=20,
-        bgcolor=ft.colors.with_opacity(0.1, ft.colors.BLUE_50),
-        margin=ft.margin.all(10),  # Margem para espaçamento
+        bgcolor=ft.colors.with_opacity(0.1, ft.colors.BLUE_50),  # Cor de fundo do container
+        margin=ft.margin.all(10),  # Margem do container
     )
 
-    # Pie chart 2: Fases de Pesquisa (Estrutura idêntica ao pie_chart_1)
+    # Cria o gráfico de pizza 2: Fases de Pesquisa (estrutura similar ao gráfico de pizza 1)
     pie_chart_2 = ft.Container(
         content=ft.Column(
             controls=[
@@ -178,7 +185,7 @@ def tela_inicial(page: ft.Page):
         margin=ft.margin.all(10),  
     )
 
-    # Pie chart 1: Alunos Ativos por Curso - responsivo
+    # Cria o gráfico de pizza 3: Alunos Ativos por Curso (versão responsiva)
     pie_chart_3 = ft.Container(
         content=ft.Column(
             controls=[
@@ -195,7 +202,7 @@ def tela_inicial(page: ft.Page):
                     ],
                     center_space_radius=0,
                 ),
-                ft.Column(  # Coluna para a legenda do gráfico 1
+                ft.Column(  # Coluna para a legenda do gráfico 3
                     controls=[
                         ft.Row(
                             controls=[
@@ -209,19 +216,19 @@ def tela_inicial(page: ft.Page):
                         )
                         for i, (label, value) in enumerate(dados_pie_chart_1)
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER,  # Centraliza a legenda
+                    alignment=ft.MainAxisAlignment.CENTER,
                 ),
             ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Centraliza todo o conteúdo do gráfico
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         ),
         width=400,
         height=600,
         padding=20,
         bgcolor=ft.colors.with_opacity(0.1, ft.colors.BLUE_50),
-        margin=ft.margin.all(10),  # Margem para espaçamento
+        margin=ft.margin.all(10),
     )
 
-    # Pie chart 2: Fases de Pesquisa (Estrutura idêntica ao pie_chart_1) - responsivo
+    # Cria o gráfico de pizza 4: Fases de Pesquisa (versão responsiva, estrutura similar ao gráfico de pizza 3)
     pie_chart_4 = ft.Container(
         content=ft.Column(
             controls=[
@@ -239,7 +246,7 @@ def tela_inicial(page: ft.Page):
                     center_space_radius=0,
                     
                 ),
-                ft.Column(  # Coluna para a legenda do gráfico 2
+                ft.Column(  # Coluna para a legenda do gráfico 4
                     controls=[
                         ft.Row(
                             controls=[
@@ -265,71 +272,82 @@ def tela_inicial(page: ft.Page):
         margin=ft.margin.all(10),  
     )
 
+    # Cria o container para a imagem do fluxo de trabalho
     fluxo_img = ft.Container(
         ft.Container(
             content=ft.Image(
-                src="fluxo.png",
-                fit=ft.ImageFit.CONTAIN,
-                width=1200,
+                src="fluxo.png",  # Caminho para a imagem do fluxo de trabalho
+                fit=ft.ImageFit.CONTAIN,  # Define o ajuste da imagem dentro do container
+                width=1200,  # Define a largura da imagem
             ),
-            expand=True,
-            alignment=ft.alignment.center,
+            expand=True,  # Permite que o container se expanda para preencher o espaço disponível
+            alignment=ft.alignment.center,  # Alinha a imagem no centro do container
         ),
-        padding=20,
-        border_radius=ft.border_radius.all(10),
-        bgcolor=ft.colors.with_opacity(0.1, ft.colors.BLUE_50),
+        padding=20,  # Define o espaçamento interno do container
+        border_radius=ft.border_radius.all(10),  # Define o raio de borda do container
+        bgcolor=ft.colors.with_opacity(0.1, ft.colors.BLUE_50),  # Define a cor de fundo do container
     )
 
-    # Container para os gráficos
+    # Cria o container para os gráficos (versão para telas maiores)
     graficos_container = ft.Row(
         controls=[
-            ft.Column(controls=[pie_chart_1], alignment=ft.MainAxisAlignment.CENTER),
-            ft.Column(controls=[pie_chart_2], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Column(controls=[pie_chart_1], alignment=ft.MainAxisAlignment.CENTER),  # Coluna para o gráfico de pizza 1
+            ft.Column(controls=[pie_chart_2], alignment=ft.MainAxisAlignment.CENTER),  # Coluna para o gráfico de pizza 2
         ],
-        alignment=ft.MainAxisAlignment.SPACE_AROUND,
+        alignment=ft.MainAxisAlignment.SPACE_AROUND,  # Define o espaçamento entre as colunas
     )
-    # Container para os gráficos responsivos
+
+    # Cria o container para os gráficos (versão responsiva para telas menores)
     graficos_container2 = ft.ResponsiveRow(
         controls=[
-            ft.Column(controls=[pie_chart_3], alignment=ft.MainAxisAlignment.START),
-            ft.Column(controls=[pie_chart_4], alignment=ft.MainAxisAlignment.START),
+            ft.Column(controls=[pie_chart_3], alignment=ft.MainAxisAlignment.START),  # Coluna para o gráfico de pizza 3
+            ft.Column(controls=[pie_chart_4], alignment=ft.MainAxisAlignment.START),  # Coluna para o gráfico de pizza 4
         ],
-        alignment=ft.MainAxisAlignment.SPACE_AROUND,
+        alignment=ft.MainAxisAlignment.SPACE_AROUND,  # Define o espaçamento entre as colunas
     )
 
+    # Cria um divisor visual
     divisor = ft.ResponsiveRow(controls=[ft.Divider()], alignment=ft.MainAxisAlignment.CENTER)
 
+    # Cria o título da tela inicial
     nome_campo = ft.Text("PÁGINA INICIAL", size=16, color="#006BA0", font_family="Roboto", weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
 
-    # Container principal da tela inicial
+    # Cria o container principal da tela inicial
     container_home = ft.Container(
-        expand=True,
+        expand=True,  # Permite que o container se expanda para preencher o espaço disponível
         content=
         ft.Column(
             controls=[
-                nome_campo,
-                divisor,
-                info_cards,
-                divisor,
-                graficos_container,  # Container para gráficos lado a lado
-                graficos_container2,
-                divisor,
-                fluxo_img,
+                nome_campo,  # Título da tela
+                divisor,  # Divisor visual
+                info_cards,  # Cards com informações sobre alunos, orientadores e cursos
+                divisor,  # Divisor visual
+                graficos_container,  # Container para os gráficos (versão para telas maiores)
+                graficos_container2,  # Container para os gráficos (versão responsiva para telas menores)
+                divisor,  # Divisor visual
+                fluxo_img,  # Container para a imagem do fluxo de trabalho
             ],
-            scroll=ft.ScrollMode.ALWAYS,
-            horizontal_alignment="CENTER"  # Habilita o scroll vertical
+            scroll=ft.ScrollMode.ALWAYS,  # Habilita a rolagem vertical
+            horizontal_alignment="CENTER"  # Define o alinhamento horizontal do conteúdo
         )
     )
 
+    # Define a função para lidar com o evento de redimensionamento da tela
     def on_resize(e):
+        """
+        Ajusta a visibilidade dos containers de gráficos de acordo com a largura da tela.
+        """
+        # Se a largura da tela for menor que 1024 pixels, exibe os gráficos responsivos e oculta os gráficos lado a lado
         if page.width < 1024:
             graficos_container.visible = False
             graficos_container2.visible = True
+        # Caso contrário, exibe os gráficos lado a lado e oculta os gráficos responsivos
         else:
             graficos_container.visible = True
             graficos_container2.visible = False
-        page.update()
+        page.update()  # Atualiza a página
 
+    # Define a visibilidade inicial dos containers de gráficos de acordo com a largura da tela
     if page.width < 1024:
         graficos_container.visible = False
         graficos_container2.visible = True
@@ -337,8 +355,11 @@ def tela_inicial(page: ft.Page):
         graficos_container.visible = True
         graficos_container2.visible = False
 
+    # Atualiza a página
     page.update()
 
+    # Define a função on_resize como a função a ser chamada quando a tela for redimensionada
     page.on_resize = on_resize
 
+    # Retorna o container principal da tela inicial
     return container_home
