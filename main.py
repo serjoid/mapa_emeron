@@ -1,37 +1,65 @@
 import flet as ft
-import home
-import acesso
-from database import Database
-import navegacao
+import home  # Importa o módulo 'home.py'
+import acesso  # Importa o módulo 'acesso.py'
+from database import Database  # Importa a classe 'Database' do módulo 'database.py'
+import navegacao  # Importa o módulo 'navegacao.py'
 
+# Inicializa a conexão com o banco de dados
 db = Database()
+
+# Declara a variável 'searchbar' como global, embora não seja utilizada neste código
 global searchbar
 
+# Define a função principal da aplicação
 def main(page: ft.Page):
+    """
+    Função principal da aplicação Flet.
+
+    Args:
+        page (ft.Page): A página Flet atual.
+    """
+
+    # Define a cor de fundo da página
     page.bgcolor = ft.colors.BLUE_50
 
+    # Define a função para exibir o menu principal após o login
     def exibir_menu_principal(usuario):
-        perfil_usuario = acesso.perfil_usuario  # Obtém o perfil do usuário logado
+        """
+        Exibe o menu principal da aplicação após o login.
+
+        Args:
+            usuario (str): O nome de usuário do usuário logado.
+        """
+
+        # Obtém o perfil do usuário logado a partir da variável global 'perfil_usuario' no módulo 'acesso'
+        perfil_usuario = acesso.perfil_usuario
+
+        # Cria os botões do menu principal
 
         botao_cadastro = ft.ElevatedButton(
-            text="Cadastro",
-            width=120,
-            height=40,
-            elevation=4,
-            bgcolor="#006BA0",
-            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
-            content=ft.Column(
+            text="Cadastro",  # Texto do botão
+            width=120,  # Largura do botão
+            height=40,  # Altura do botão
+            elevation=4,  # Elevação do botão
+            bgcolor="#006BA0",  # Cor de fundo do botão
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),  # Estilo do botão (borda arredondada)
+            content=ft.Column(  # Conteúdo do botão (coluna com texto centralizado)
                 controls=[
                     ft.Text(
-                        "Cadastro", size=12, color="WHITE", text_align=ft.TextAlign.CENTER
+                        "Cadastro", size=12, color="WHITE", text_align=ft.TextAlign.CENTER  # Texto do botão
                     )
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.CENTER,  # Alinhamento vertical do conteúdo
             ),
-            color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
-            visible=(perfil_usuario == "Admin"),
+            color="WHITE",  # Cor do texto do botão
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Função a ser chamada quando o botão for clicado (navega para a tela de cadastro)
+            visible=(perfil_usuario == "Admin"),  # Visível apenas para usuários com perfil "Admin"
         )
+
+        # Os outros botões seguem a mesma estrutura do botão 'botao_cadastro', com algumas variações:
+        # - Texto do botão
+        # - Função a ser chamada quando o botão for clicado (navega para a tela correspondente)
+        # - Visibilidade do botão de acordo com o perfil do usuário
 
         botao_logs = ft.ElevatedButton(
             text="Logs",
@@ -49,7 +77,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
             visible=(perfil_usuario == "Admin"),
         )
 
@@ -69,8 +97,8 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
-            visible=usuario is not None,
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
+            visible=usuario is not None,  # Visível apenas se o usuário estiver logado
         )
 
         botao_sair = ft.ElevatedButton(
@@ -78,7 +106,7 @@ def main(page: ft.Page):
             width=120,
             height=40,
             elevation=4,
-            bgcolor="#D32F2F",
+            bgcolor="#D32F2F",  # Cor de fundo vermelha para o botão "Sair"
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
             content=ft.Column(
                 controls=[
@@ -89,8 +117,8 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: acesso.sair(e, usuario, exibir_menu_principal),
-            visible=usuario is not None,
+            on_click=lambda e: acesso.sair(e, usuario, exibir_menu_principal),  # Chama a função 'sair' do módulo 'acesso' para realizar o logout
+            visible=usuario is not None,  # Visível apenas se o usuário estiver logado
         )
 
         botao_submissoes = ft.ElevatedButton(
@@ -112,7 +140,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
         )
 
         botao_orientadores = ft.ElevatedButton(
@@ -134,7 +162,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
         )
 
         botao_cursos = ft.ElevatedButton(
@@ -153,8 +181,8 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
-            visible=(perfil_usuario == "Admin"),
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
+            visible=(perfil_usuario == "Admin"),  # Visível apenas para usuários com perfil "Admin"
         )
 
         botao_relatorios = ft.ElevatedButton(
@@ -176,8 +204,8 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
-            visible=(perfil_usuario != "Aluno"),
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
+            visible=(perfil_usuario != "Aluno"),  # Visível apenas para usuários que não são "Aluno"
         )
 
         botao_inicio = ft.ElevatedButton(
@@ -196,7 +224,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
         )
 
         botao_alunos = ft.ElevatedButton(
@@ -215,7 +243,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
         )
 
         botao_andamento_pesquisa = ft.ElevatedButton(
@@ -228,7 +256,7 @@ def main(page: ft.Page):
             content=ft.Column(
                 controls=[
                     ft.Text(
-                        "Andamento\nda Pesquisa",
+                        "Andamento\nda Pesquisa",  # Texto do botão em duas linhas
                         size=12,
                         color="WHITE",
                         text_align=ft.TextAlign.CENTER,
@@ -237,8 +265,10 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
         )
+
+        # Botões para links externos (EMERON, CEPEP, Biblioteca, Periódicos, Manual do Usuário)
 
         botao_emeron = ft.ElevatedButton(
             text="EMERON",
@@ -256,7 +286,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda _: page.launch_url("https://emeron.tjro.jus.br/"),
+            on_click=lambda _: page.launch_url("https://emeron.tjro.jus.br/"),  # Abre o link da EMERON em uma nova aba
         )
 
         botao_cepep = ft.ElevatedButton(
@@ -275,7 +305,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda _: page.launch_url("https://emeron.tjro.jus.br/cepep"),
+            on_click=lambda _: page.launch_url("https://emeron.tjro.jus.br/cepep"),  # Abre o link do CEPEP em uma nova aba
         )
 
         botao_biblioteca = ft.ElevatedButton(
@@ -297,7 +327,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda _: page.launch_url("https://emeron.tjro.jus.br/biblioteca"),
+            on_click=lambda _: page.launch_url("https://emeron.tjro.jus.br/biblioteca"),  # Abre o link da Biblioteca em uma nova aba
         )
 
         botao_periodicos = ft.ElevatedButton(
@@ -321,7 +351,7 @@ def main(page: ft.Page):
             color="WHITE",
             on_click=lambda _: page.launch_url(
                 "https://periodicos.emeron.edu.br/index.php/emeron"
-            ),
+            ),  # Abre o link dos Periódicos em uma nova aba
         )
 
         botao_manual = ft.ElevatedButton(
@@ -335,7 +365,7 @@ def main(page: ft.Page):
             content=ft.Column(
                 controls=[
                     ft.Text(
-                        "Manual\ndo Usuário",
+                        "Manual\ndo Usuário",  # Texto do botão em duas linhas
                         size=12,
                         color="WHITE",
                         text_align=ft.TextAlign.CENTER,
@@ -344,7 +374,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             on_click=lambda _: page.launch_url(
-                "# INSIRA AQUI O LINK PARA O MANUAL DO SISTEMA"
+                "# INSIRA AQUI O LINK PARA O MANUAL DO SISTEMA"  # Substitua pelo link real do manual do sistema
             ),
         )
 
@@ -367,19 +397,20 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             color="WHITE",
-            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),  # Usa a variável local
+            on_click=lambda e: navegacao.navegar(e, usuario, page, perfil_usuario),
         )
 
+        # Cria o container do menu de navegação lateral
         menu_navegacao = ft.Container(
             width=160,
             height=900,
             padding=10,
-            bgcolor=ft.colors.BLUE_50,
-            border_radius=ft.border_radius.all(10),
-            content=ft.Column(
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            bgcolor=ft.colors.BLUE_50,  # Cor de fundo do menu
+            border_radius=ft.border_radius.all(10),  # Borda arredondada
+            content=ft.Column(  # Conteúdo do menu (coluna com os botões)
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Alinhamento horizontal dos botões
                 controls=[
-                    ft.Text(
+                    ft.Text(  # Título do menu
                         "MENU",
                         size=16,
                         color="#006BA0",
@@ -387,92 +418,112 @@ def main(page: ft.Page):
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.CENTER,
                     ),
-                    ft.Divider(),
-                    botao_inicio,
-                    botao_cursos,
-                    botao_orientadores,
-                    botao_alunos,
-                    botao_relatorios,
-                    botao_andamento_pesquisa,
-                    botao_submissoes,
-                    botao_cadastro,
-                    botao_logs,
-                    botao_alterar_senha,
-                    ft.Divider(),
-                    botao_emeron,
-                    botao_cepep,
-                    botao_biblioteca,
-                    botao_periodicos,
-                    botao_manual,
-                    ft.Divider(),
-                    botao_sair,
+                    ft.Divider(),  # Divisor visual
+                    botao_inicio,  # Botão "Início"
+                    botao_cursos,  # Botão "Cursos"
+                    botao_orientadores,  # Botão "Orientadores"
+                    botao_alunos,  # Botão "Alunos"
+                    botao_relatorios,  # Botão "Relatórios"
+                    botao_andamento_pesquisa,  # Botão "Andamento da Pesquisa"
+                    botao_submissoes,  # Botão "Submissões"
+                    botao_cadastro,  # Botão "Cadastro"
+                    botao_logs,  # Botão "Logs"
+                    botao_alterar_senha,  # Botão "Alterar Senha"
+                    ft.Divider(),  # Divisor visual
+                    botao_emeron,  # Botão "EMERON" (link externo)
+                    botao_cepep,  # Botão "CEPEP" (link externo)
+                    botao_biblioteca,  # Botão "Biblioteca" (link externo)
+                    botao_periodicos,  # Botão "Periódicos" (link externo)
+                    botao_manual,  # Botão "Manual do Usuário" (link externo)
+                    ft.Divider(),  # Divisor visual
+                    botao_sair,  # Botão "Sair"
                 ],
             ),
-            visible=True,  # Inicialmente visível
+            visible=True,  # O menu é inicialmente visível
         )
 
+        # Cria o container para o conteúdo principal da página
         conteudo_container = ft.Container(
-            expand=True,
-            height=900,
-            padding=10,
-            bgcolor=ft.colors.BLUE_50,
-            border_radius=ft.border_radius.all(10),
+            expand=True,  # Permite que o container se expanda para preencher o espaço disponível
+            height=900,  # Altura do container
+            padding=10,  # Espaçamento interno do container
+            bgcolor=ft.colors.BLUE_50,  # Cor de fundo do container
+            border_radius=ft.border_radius.all(10),  # Borda arredondada
         )
 
+        # Define a função para ocultar/exibir o menu de navegação
         def oculta_navegacao(e):
-            menu_navegacao.visible = not menu_navegacao.visible
-            menu_navegacao.update()
+            """
+            Oculta ou exibe o menu de navegação lateral.
 
-        page.title = "MAPA - EMERON"
-        page.theme_mode = "LIGHT"
-        page.assets_dir = "assets"
-        page.appbar = ft.AppBar(
-            leading=ft.IconButton(
-                ft.icons.BOOK, icon_color="WHITE", on_click=oculta_navegacao
+            Args:
+                e (ft.Event): O evento que acionou a função (clique no botão do menu).
+            """
+            menu_navegacao.visible = not menu_navegacao.visible  # Inverte a visibilidade do menu
+            menu_navegacao.update()  # Atualiza o menu na tela
+
+        # Configurações da página
+        page.title = "MAPA - EMERON"  # Define o título da página
+        page.theme_mode = "LIGHT"  # Define o tema da página como claro
+        page.assets_dir = "assets"  # Define o diretório de assets da página
+        page.appbar = ft.AppBar(  # Define a barra de aplicativo superior
+            leading=ft.IconButton(  # Botão de menu (ícone de livro)
+                ft.icons.BOOK, icon_color="WHITE", on_click=oculta_navegacao  # Chama a função 'oculta_navegacao' quando o botão for clicado
             ),
-            leading_width=40,
-            toolbar_height=40,
-            title=ft.Text(
+            leading_width=40,  # Largura do botão de menu
+            toolbar_height=40,  # Altura da barra de aplicativo
+            title=ft.Text(  # Título da barra de aplicativo
                 "Módulo de Acompanhamento da Produção Acadêmica - MAPA",
                 color="WHITE",
                 size=16,
                 font_family="Roboto",
-                weight=ft.FontWeight.W_500,
+                weight=ft.FontWeight.W_500,  # Define o peso da fonte como médio
             ),
-            center_title=True,
-            bgcolor="#006BA0",
+            center_title=True,  # Centraliza o título na barra de aplicativo
+            bgcolor="#006BA0",  # Cor de fundo da barra de aplicativo
             actions=[
-                ft.Container(
-                    content=ft.Image(
-                        src="logo.png", width=186, height=40, fit=ft.ImageFit.CONTAIN
+                ft.Container(  # Container para a logo da EMERON
+                    content=ft.Image(  # Imagem da logo
+                        src="logo.png", width=186, height=40, fit=ft.ImageFit.CONTAIN  # Define a imagem, largura, altura e ajuste
                     ),
-                    margin=ft.margin.only(right=20),
+                    margin=ft.margin.only(right=20),  # Define a margem do container
                 )
             ],
         )
 
-        page.scroll = True
+        page.scroll = True  # Habilita a rolagem da página
 
+        # Cria o layout principal da página (menu lateral + conteúdo)
         menu_principal = ft.Container(
             ft.Column(
                 controls=[
-                    ft.Row(
-                        vertical_alignment=ft.CrossAxisAlignment.START,
-                        controls=[menu_navegacao, conteudo_container],
+                    ft.Row(  # Linha com o menu lateral e o conteúdo
+                        vertical_alignment=ft.CrossAxisAlignment.START,  # Alinhamento vertical dos elementos da linha
+                        controls=[menu_navegacao, conteudo_container],  # Adiciona o menu lateral e o container de conteúdo à linha
                     )
                 ],
-                scroll=ft.ScrollMode.ALWAYS,
+                scroll=ft.ScrollMode.ALWAYS,  # Habilita a rolagem da coluna
             )
         )
 
+        # Limpa a página e adiciona o layout principal
         page.controls.clear()
         page.add(menu_principal)
         page.update()
 
+        # Define o conteúdo inicial do container de conteúdo como a tela inicial
         conteudo_container.content = home.tela_inicial(page)
         conteudo_container.update()
 
+        # Define a função para lidar com o evento de redimensionamento da tela
         def on_resize(e):
+            """
+            Ajusta o layout da página quando a janela é redimensionada.
+
+            Args:
+                e (ft.Event): O evento de redimensionamento.
+            """
+            # Se a largura da tela for menor que 640 pixels, oculta o menu lateral e ajusta o título da barra de aplicativo
             if page.width < 640:
                 menu_navegacao.visible = False
                 page.appbar.title = ft.Text(
@@ -482,6 +533,7 @@ def main(page: ft.Page):
                     font_family="Roboto",
                     weight=ft.FontWeight.W_500,
                 )
+            # Caso contrário, exibe o menu lateral e define o título completo da barra de aplicativo
             else:
                 menu_navegacao.visible = True
                 page.appbar.title = ft.Text(
@@ -491,8 +543,9 @@ def main(page: ft.Page):
                     font_family="Roboto",
                     weight=ft.FontWeight.W_500,
                 )
-            page.update()
+            page.update()  # Atualiza a página para exibir as alterações
 
+        # Define a visibilidade inicial do menu lateral e o título da barra de aplicativo de acordo com a largura da tela
         if page.width < 640:
             menu_navegacao.visible = False
             page.appbar.title = ft.Text(
@@ -511,10 +564,13 @@ def main(page: ft.Page):
                 font_family="Roboto",
                 weight=ft.FontWeight.W_500,
             )
-        page.update()
+        page.update()  # Atualiza a página
 
+        # Define a função 'on_resize' como a função a ser chamada quando a tela for redimensionada
         page.on_resize = on_resize
 
+    # Exibe a tela de login ao iniciar a aplicação
     acesso.exibir_tela_login(page, exibir_menu_principal)
 
+# Inicia a aplicação Flet
 ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=4253)
