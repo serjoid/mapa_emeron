@@ -1,9 +1,9 @@
 from database import Database
 import flet as ft
 
+
 # Conexão com o banco de dados
 db = Database()
-
 
 def tela_profile(page: ft.Page, nome_aluno):
     # Criar os TextFields para exibir as informações do aluno
