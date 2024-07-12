@@ -5,68 +5,128 @@ import hashlib
 import datetime
 
 class Database:
+    """
+    Classe para interagir com o banco de dados MySQL.
+    """
+
     def __init__(self):
+        """
+        Inicializa a classe com as configurações de conexão com o banco de dados.
+        Substitua os valores de 'user', 'password', 'host' e 'database' pelas suas credenciais.
+        """
         self.db_config = {
-            'user': 'seu_usuario',       # substitua pelo seu usuário MySQL
-            'password': 'sua_senha',     # substitua pela sua senha MySQL
-            'host': 'seu_host',         # substitua pelo host do seu servidor MySQL
-            'database': 'seu_banco_de_dados'      # substitua pelo nome do seu banco de dados
+            'user': 'seu_usuario',
+            'password': 'sua_senha',
+            'host': 'seu_host',
+            'database': 'seu_banco_de_dados'
         }
 
     def get_db_assistente(self):
+        """
+        Obtém todos os registros da tabela 'pessoas' com perfil 'Discente', ordenados por nome.
+        
+        Returns:
+            list: Uma lista de tuplas, onde cada tupla representa um registro do banco de dados.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM pessoas WHERE perfil = 'Discente' ORDER BY nome")
             return cursor.fetchall()
 
     def get_db_assistente_prazos(self):
+        """
+        Obtém todos os registros da tabela 'prazos'.
+
+        Returns:
+            list: Uma lista de tuplas, onde cada tupla representa um registro do banco de dados.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM prazos")
             return cursor.fetchall()
     
     def get_db_assistente_curso(self):
+        """
+        Obtém todos os registros da tabela 'cursos'.
+
+        Returns:
+            list: Uma lista de tuplas, onde cada tupla representa um registro do banco de dados.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM cursos")
             return cursor.fetchall()
 
     def get_titulos_tcc(self):
+        """
+        Obtém todos os títulos de TCC da tabela 'pessoas' com perfil 'Discente'.
+
+        Returns:
+            list: Uma lista de strings, onde cada string representa um título de TCC.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT titulo_tcc FROM pessoas WHERE perfil = 'Discente' AND titulo_tcc IS NOT NULL")
             return [row[0] for row in cursor.fetchall()]
 
     def get_aluno(self):
-        """Retorna uma lista de nomes de alunos."""
+        """
+        Obtém uma lista de nomes de alunos da tabela 'pessoas' com perfil 'Discente', ordenados por nome.
+
+        Returns:
+            list: Uma lista de strings, onde cada string representa o nome de um aluno.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT nome FROM pessoas WHERE perfil = 'Discente' ORDER BY nome")
             return [row[0] for row in cursor.fetchall()]
         
     def get_aluno2(self):
-        """Retorna uma lista de dicionários, cada um representando um aluno com 'id' e 'nome'."""
+        """
+        Obtém uma lista de dicionários, cada um representando um aluno com 'id' e 'nome'.
+
+        Returns:
+            list: Uma lista de dicionários, onde cada dicionário contém as chaves 'id' e 'nome' representando um aluno.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id, nome FROM pessoas WHERE perfil = 'Discente' ORDER BY nome")
             return [{"id": row[0], "nome": row[1]} for row in cursor.fetchall()]
     
     def get_orientador(self):
-        """Retorna uma lista de nomes de orientadores."""
+        """
+        Obtém uma lista de nomes de orientadores da tabela 'pessoas' com perfil 'Orientador', ordenados por nome.
+
+        Returns:
+            list: Uma lista de strings, onde cada string representa o nome de um orientador.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT nome FROM pessoas WHERE perfil = 'Orientador' ORDER BY nome")
             return [row[0] for row in cursor.fetchall()]
         
     def get_curso(self):
-        """Retorna uma lista de nomes de cursos."""
+        """
+        Obtém uma lista de nomes de cursos distintos da tabela 'cursos', ordenados por nome.
+
+        Returns:
+            list: Uma lista de strings, onde cada string representa o nome de um curso.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT DISTINCT nome_curso FROM cursos ORDER BY nome_curso")
             return [row[0] for row in cursor.fetchall()]
         
     def get_orientando(self, orientador):
-        """Retorna os nomes dos orientandos de um orientador específico."""
+        """
+        Obtém os nomes dos alunos orientandos de um orientador específico.
+
+        Args:
+            orientador (str): O nome do orientador.
+
+        Returns:
+            list: Uma lista de strings, onde cada string representa o nome de um aluno orientando.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -76,8 +136,12 @@ class Database:
             return [row[0] for row in rows]
         
     def get_relatorio(self):
-        """Retorna os dados para o DataTable, 
+        """
+        Obtém os dados para o DataTable do relatório de alunos, 
         exibindo apenas a fase da pesquisa mais recente de cada aluno.
+
+        Returns:
+            list: Uma lista de ft.DataRow, onde cada DataRow representa uma linha do DataTable.
         """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
@@ -99,75 +163,98 @@ class Database:
                 WHERE p.perfil = 'Discente'
                 ORDER BY p.nome
             """)
-            dados_alunos = cursor.fetchall()
-            rows = []
+            dados_alunos = cursor.fetchall() # Obtém os dados dos alunos do banco de dados
+            rows = [] # Cria uma lista vazia para armazenar as linhas do DataTable
+            # Itera sobre os dados dos alunos
             for aluno in dados_alunos:
+                # Cria as células da linha do DataTable
                 cells = [
                     ft.DataCell(ft.Text(valor, size=10, selectable=True)) if valor is not None else ft.DataCell(ft.Text("", size=10, selectable=True))
                     for valor in aluno
                 ]
+                # Cria a linha do DataTable e a adiciona à lista de linhas
                 rows.append(ft.DataRow(cells=cells))
+            # Retorna a lista de linhas do DataTable
             return rows
             
     def get_relatorio_geral(self):
-            """Retorna os dados para o DataFrame, 
-            buscando a fase da pesquisa da tabela 'prazos'.
-            """
-            with mysql.connector.connect(**self.db_config) as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT 
-                        p.perfil, 
-                        p.nome, 
-                        p.telefone, 
-                        p.email, 
-                        p.lattes, 
-                        p.matricula, 
-                        p.orientador,
-                        p.instituicao, 
-                        p.uf_instituicao, 
-                        p.curso, 
-                        p.nivel_curso, 
-                        p.situacao_aluno_curso, 
-                        p.ano_ingresso, 
-                        p.ano_conclusao,
-                        p.titulo_tcc, 
-                        p.tipo_tcc, 
-                        pz.fase_pesquisa,  -- Busca a fase da pesquisa da tabela 'prazos'
-                        pz.prazo_fase_pesquisa,  -- Busca o prazo da fase da pesquisa da tabela 'prazos'
-                        pz.prazo_dias,
-                        pz.prazo_situacao,
-                        pz.situacao_fase_pesquisa,
-                        p.situacao_matricula, 
-                        p.grupo_pesquisa, 
-                        p.linha_pesquisa,
-                        p.bolsa, 
-                        p.tipo_bolsa, 
-                        p.vinculo, 
-                        p.polo, 
-                        p.doc_compromisso, 
-                        p.via_tcc_entregue,
-                        p.titulacao
-                    FROM pessoas p
-                    LEFT JOIN prazos pz ON p.id = pz.id_pessoa
-                    AND pz.id = (SELECT MAX(id) FROM prazos WHERE id_pessoa = p.id) -- Busca o prazo mais recente
-                    ORDER BY p.nome
-                """)
-                relatorio_geral = cursor.fetchall()
+        """
+        Obtém os dados para o DataFrame do relatório geral, 
+        incluindo a fase da pesquisa mais recente de cada aluno.
 
-                colunas = [
-                    "perfil", "nome", "telefone", "email", "lattes", "matricula", "orientador",
-                    "instituicao", "uf_instituicao", "curso", "nivel_curso", "situacao_aluno_curso", 
-                    "ano_ingresso", "ano_conclusao", "titulo_tcc", "tipo_tcc", 
-                    "fase_pesquisa", "prazo_fase_pesquisa", "prazo_dias", "prazo_situacao", "situacao_fase_pesquisa",
-                    "situacao_matricula", "grupo_pesquisa", "linha_pesquisa", "bolsa", "tipo_bolsa", 
-                    "vinculo", "polo", "doc_compromisso", "via_tcc_entregue", "titulacao"
-                ]
-                df = pd.DataFrame(relatorio_geral, columns=colunas)
-                return df
+        Returns:
+            pd.DataFrame: Um DataFrame com os dados do relatório geral.
+        """
+        with mysql.connector.connect(**self.db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    p.perfil, 
+                    p.nome, 
+                    p.telefone, 
+                    p.email, 
+                    p.lattes, 
+                    p.matricula, 
+                    p.orientador,
+                    p.instituicao, 
+                    p.uf_instituicao, 
+                    p.curso, 
+                    p.nivel_curso, 
+                    p.situacao_aluno_curso, 
+                    p.ano_ingresso, 
+                    p.ano_conclusao,
+                    p.titulo_tcc, 
+                    p.tipo_tcc, 
+                    pz.fase_pesquisa,
+                    pz.prazo_fase_pesquisa,
+                    pz.prazo_dias,
+                    pz.prazo_situacao,
+                    pz.situacao_fase_pesquisa,
+                    p.situacao_matricula, 
+                    p.grupo_pesquisa, 
+                    p.linha_pesquisa,
+                    p.bolsa, 
+                    p.tipo_bolsa, 
+                    p.vinculo, 
+                    p.polo, 
+                    p.doc_compromisso, 
+                    p.via_tcc_entregue,
+                    p.titulacao
+                FROM pessoas p
+                LEFT JOIN prazos pz ON p.id = pz.id_pessoa
+                AND pz.id = (SELECT MAX(id) FROM prazos WHERE id_pessoa = p.id)
+                ORDER BY p.nome
+            """)
+            # Obtém os dados do relatório geral do banco de dados
+            relatorio_geral = cursor.fetchall()
+
+            # Define as colunas do DataFrame
+            colunas = [
+                "perfil", "nome", "telefone", "email", "lattes", "matricula", "orientador",
+                "instituicao", "uf_instituicao", "curso", "nivel_curso", "situacao_aluno_curso", 
+                "ano_ingresso", "ano_conclusao", "titulo_tcc", "tipo_tcc", 
+                "fase_pesquisa", "prazo_fase_pesquisa", "prazo_dias", "prazo_situacao", "situacao_fase_pesquisa",
+                "situacao_matricula", "grupo_pesquisa", "linha_pesquisa", "bolsa", "tipo_bolsa", 
+                "vinculo", "polo", "doc_compromisso", "via_tcc_entregue", "titulacao"
+            ]
+
+            # Cria o DataFrame com os dados e as colunas
+            df = pd.DataFrame(relatorio_geral, columns=colunas)
+
+            # Retorna o DataFrame
+            return df
             
     def get_orientador_relatorio(self, orientador_filtrado):
-        """Retorna as informações dos alunos de um orientador específico."""
+        """
+        Obtém os dados para o DataTable do relatório de um orientador específico, 
+        exibindo apenas a fase da pesquisa mais recente de cada aluno.
+
+        Args:
+            orientador_filtrado (str): O nome do orientador a ser filtrado.
+
+        Returns:
+            list: Uma lista de ft.DataRow, onde cada DataRow representa uma linha do DataTable.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -184,7 +271,7 @@ class Database:
                     pz.situacao_fase_pesquisa
                 FROM pessoas p
                 LEFT JOIN prazos pz ON p.id = pz.id_pessoa 
-                AND pz.id = (SELECT MAX(id) FROM prazos WHERE id_pessoa = p.id) -- condição para evitar duplicatas
+                AND pz.id = (SELECT MAX(id) FROM prazos WHERE id_pessoa = p.id)
                 WHERE p.perfil = 'Discente' AND p.orientador = %s
                 ORDER BY p.nome
             """, (orientador_filtrado,))
@@ -203,7 +290,16 @@ class Database:
             return rows
                 
     def get_curso_relatorio(self, curso_filtrado):
-        """Retorna as informações dos alunos de um curso específico."""
+        """
+        Obtém os dados para o DataTable do relatório de um curso específico, 
+        exibindo apenas a fase da pesquisa mais recente de cada aluno.
+
+        Args:
+            curso_filtrado (str): O nome do curso a ser filtrado.
+
+        Returns:
+            list: Uma lista de ft.DataRow, onde cada DataRow representa uma linha do DataTable.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -238,7 +334,15 @@ class Database:
             return rows
 
     def get_pessoa_info(self, nome):
-        """Retorna as informações de uma pessoa pelo nome."""
+        """
+        Obtém as informações de uma pessoa a partir do nome.
+
+        Args:
+            nome (str): O nome da pessoa.
+
+        Returns:
+            dict: Um dicionário com as informações da pessoa.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -280,13 +384,21 @@ class Database:
             """, (nome,))
             row = cursor.fetchone()
             if row is None:
-                return {} 
+                return {} # Retorna um dicionário vazio se a pessoa não for encontrada
             columns = [column[0] for column in cursor.description]
             pessoa_info = dict(zip(columns, row))
             return pessoa_info
         
     def get_pessoa_info_by_id(self, pessoa_id):
-        """Retorna as informações de uma pessoa pelo ID."""
+        """
+        Obtém as informações de uma pessoa a partir do ID.
+
+        Args:
+            pessoa_id (int): O ID da pessoa.
+
+        Returns:
+            dict: Um dicionário com as informações da pessoa.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -328,13 +440,22 @@ class Database:
             """, (pessoa_id,))
             row = cursor.fetchone()
             if row is None:
-                return {} 
+                return {} # Retorna um dicionário vazio se a pessoa não for encontrada
             columns = [column[0] for column in cursor.description]
             pessoa_info = dict(zip(columns, row))
             return pessoa_info
         
-    def get_orientador_info(self, nome):
-        """Retorna as informações de um aluno específico pelo nome."""
+        def get_orientador_info(self, nome):
+        """
+        Retorna as informações de um orientador específico pelo nome.
+
+        Args:
+            nome (str): O nome do orientador.
+
+        Returns:
+            dict: Um dicionário com as informações do orientador. 
+                  Retorna um dicionário vazio se o orientador não for encontrado.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -346,22 +467,27 @@ class Database:
                         linha_pesquisa, bolsa, tipo_bolsa, vinculo, polo, doc_compromisso,
                         via_tcc_entregue, prazo_fase_pesquisa, titulacao
                 FROM pessoas WHERE perfil = 'Orientador' and nome = %s""", (nome,))
-            row = cursor.fetchone()
+            row = cursor.fetchone() # Obtém o primeiro registro retornado pela consulta
             if row is None:
-                return {}  # Return an empty dictionary if no match is found
-            columns = [column[0] for column in cursor.description]
-            orientador_info = dict(zip(columns, row))
-            if 'nome' in orientador_info:
-                return orientador_info
+                return {}  # Retorna um dicionário vazio se nenhum registro for encontrado
+            columns = [column[0] for column in cursor.description] # Obtém os nomes das colunas da consulta
+            orientador_info = dict(zip(columns, row)) # Cria um dicionário com os nomes das colunas e os valores do registro
+            if 'nome' in orientador_info: # Verifica se a chave 'nome' existe no dicionário
+                return orientador_info # Retorna o dicionário com as informações do orientador
             else:
-                return {}
+                return {} # Retorna um dicionário vazio se a chave 'nome' não existir
 
     def insert_pessoa(self, pessoa_data):
-        """Insere uma nova pessoa na tabela."""
+        """
+        Insere uma nova pessoa na tabela 'pessoas'.
+
+        Args:
+            pessoa_data (dict): Um dicionário contendo os dados da pessoa a serem inseridos.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             try:
-                # Extraia os dados da pessoa para a tabela 'pessoas'
+                # Extrai os dados da pessoa para a tabela 'pessoas'
                 pessoa_data_pessoas = {
                     k: v.upper() if k in ['nome', 'matricula', 'tipo_tcc', 'titulo_tcc', 'situacao_matricula',
                                         'grupo_pesquisa', 'linha_pesquisa', 'doc_compromisso'] else v
@@ -382,11 +508,13 @@ class Database:
 
                 # Verificar se o nome já existe na tabela
                 cursor.execute("SELECT COUNT(*) FROM pessoas WHERE nome = %s", (pessoa_data_pessoas['nome'],))
-                count = cursor.fetchone()[0]
+                count = cursor.fetchone()[0] # Obtém o número de registros com o mesmo nome
 
+                # Se o nome já existir, adiciona "(2)" ao final do nome
                 if count > 0:
                     pessoa_data_pessoas['nome'] += ' (2)'
 
+                # Insere os dados da pessoa na tabela 'pessoas'
                 cursor.execute("""
                     INSERT INTO pessoas (
                         perfil, nome, telefone, email, lattes, matricula, orientador, instituicao,
@@ -411,14 +539,19 @@ class Database:
                     pessoa_data_pessoas['doc_compromisso'], pessoa_data_pessoas['via_tcc_entregue'],
                     pessoa_data_pessoas['titulacao']
                 ))
-                conn.commit()
+                conn.commit() # Salva as alterações no banco de dados
                 print("Pessoa cadastrada com sucesso.")
             except Exception as e:
                 print(f"Erro ao cadastrar pessoa: {e}")
                 conn.rollback()  # Reverte a transação em caso de erro
 
     def update_pessoa(self, pessoa_data):
-        """Atualiza os dados de uma pessoa existente."""
+        """
+        Atualiza os dados de uma pessoa existente na tabela 'pessoas'.
+
+        Args:
+            pessoa_data (dict): Um dicionário contendo os dados da pessoa a serem atualizados, incluindo o ID da pessoa.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             try:
@@ -435,6 +568,7 @@ class Database:
                 # Limpa o campo telefone, mantendo apenas dígitos numéricos
                 pessoa_data['telefone'] = ''.join(filter(str.isdigit, pessoa_data['telefone']))
 
+                # Atualiza os dados da pessoa na tabela 'pessoas'
                 cursor.execute("""
                     UPDATE pessoas
                     SET perfil = %s, nome = %s, telefone = %s, email = %s, lattes = %s, matricula = %s, 
@@ -456,7 +590,7 @@ class Database:
                     pessoa_data['bolsa'], pessoa_data['tipo_bolsa'], pessoa_data['vinculo'], pessoa_data['polo'], 
                     pessoa_data['doc_compromisso'], pessoa_data['via_tcc_entregue'],
                     pessoa_data['id']))
-                conn.commit()
+                conn.commit() # Salva as alterações no banco de dados
                 print("Pessoa atualizada com sucesso.")
             except mysql.connector.Error as e:
                 print(f"Erro ao atualizar pessoa: {e}")
@@ -464,20 +598,34 @@ class Database:
                 print(f"Chave ausente no dicionário: {e}")
 
     def get_curso_info(self, nome_curso):
-        """Retorna as informações de um curso específico pelo nome."""
+        """
+        Retorna as informações de um curso específico pelo nome.
+
+        Args:
+            nome_curso (str): O nome do curso.
+
+        Returns:
+            dict: Um dicionário com as informações do curso. 
+                  Retorna um dicionário vazio se o curso não for encontrado.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                         SELECT ID, nome_curso, sigla_curso, tipo_curso, area_curso, coordenador_curso
                         FROM cursos WHERE nome_curso = %s""", (nome_curso,))
-            row = cursor.fetchone()
+            row = cursor.fetchone() # Obtém o primeiro registro retornado pela consulta
             if row is None:
-                return {}  # Return an empty dictionary if no match is found
-            columns = [column[0] for column in cursor.description]
-            return dict(zip(columns, row))
+                return {}  # Retorna um dicionário vazio se nenhum registro for encontrado
+            columns = [column[0] for column in cursor.description] # Obtém os nomes das colunas da consulta
+            return dict(zip(columns, row)) # Cria um dicionário com os nomes das colunas e os valores do registro
             
     def insert_curso(self, curso_data):
-        """Insere um novo curso na tabela."""
+        """
+        Insere um novo curso na tabela 'cursos'.
+
+        Args:
+            curso_data (dict): Um dicionário contendo os dados do curso a serem inseridos.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             try:
@@ -485,7 +633,7 @@ class Database:
                     INSERT INTO cursos (nome_curso, sigla_curso, tipo_curso, area_curso, coordenador_curso)
                     VALUES (%s, %s, %s, %s, %s)""",
                     (curso_data['nome_curso'], curso_data['sigla_curso'], curso_data['tipo_curso'], curso_data['area_curso'], curso_data['coordenador_curso']))
-                conn.commit()
+                conn.commit() # Salva as alterações no banco de dados
                 print("Curso cadastrado com sucesso.")
             except mysql.connector.Error as e:
                 print(f"Erro ao cadastrar curso: {e}")
@@ -493,7 +641,12 @@ class Database:
                 print(f"Chave ausente no dicionário: {e}")
 
     def update_curso(self, curso_data):
-        """Atualiza os dados de um curso existente."""
+        """
+        Atualiza os dados de um curso existente na tabela 'cursos'.
+
+        Args:
+            curso_data (dict): Um dicionário contendo os dados do curso a serem atualizados, incluindo o ID do curso.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             try:
@@ -503,7 +656,7 @@ class Database:
                     WHERE ID = %s
                 """, (curso_data['nome_curso'], curso_data['sigla_curso'], curso_data['tipo_curso'], 
                     curso_data['area_curso'], curso_data['coordenador_curso'], curso_data['ID']))
-                conn.commit()
+                conn.commit() # Salva as alterações no banco de dados
                 print("Curso atualizado com sucesso.")
             except mysql.connector.Error as e:
                 print(f"Erro ao atualizar curso: {e}")
@@ -511,7 +664,12 @@ class Database:
                 print(f"Chave ausente no dicionário: {e}")
 
     def insert_orientador(self, orientador_data):
-        """Insere um novo orientador na tabela."""
+        """
+        Insere um novo orientador na tabela 'pessoas'.
+
+        Args:
+            orientador_data (dict): Um dicionário contendo os dados do orientador a serem inseridos.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             try:
@@ -523,6 +681,7 @@ class Database:
                 # Limpa o campo telefone, mantendo apenas dígitos numéricos
                 orientador_data['telefone'] = ''.join(filter(str.isdigit, orientador_data['telefone']))
 
+                # Insere os dados do orientador na tabela 'pessoas'
                 cursor.execute("""
                     INSERT INTO pessoas (
                         perfil, nome, telefone, email, lattes, curso, titulacao, 
@@ -537,7 +696,7 @@ class Database:
                     orientador_data['instituicao'], orientador_data['vinculo'], orientador_data['polo'],
                     orientador_data['uf_instituicao']
                 ))
-                conn.commit()
+                conn.commit() # Salva as alterações no banco de dados
                 print("Orientador cadastrado com sucesso.")
             except mysql.connector.Error as e:
                 print(f"Erro ao cadastrar orientador: {e}")
@@ -545,7 +704,12 @@ class Database:
                 print(f"Chave ausente no dicionário: {e}")
 
     def update_orientador(self, orientador_data):
-        """Atualiza os dados de um orientador existente."""
+        """
+        Atualiza os dados de um orientador existente na tabela 'pessoas'.
+
+        Args:
+            orientador_data (dict): Um dicionário contendo os dados do orientador a serem atualizados, incluindo o ID do orientador.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             try:
@@ -557,6 +721,7 @@ class Database:
                 # Limpa o campo telefone, mantendo apenas dígitos numéricos
                 orientador_data['telefone'] = ''.join(filter(str.isdigit, orientador_data['telefone']))
 
+                # Atualiza os dados do orientador na tabela 'pessoas'
                 cursor.execute("""
                     UPDATE pessoas
                     SET nome = %s, telefone = %s, email = %s, curso = %s, titulacao = %s, 
@@ -568,7 +733,7 @@ class Database:
                     orientador_data['instituicao'], orientador_data['vinculo'], orientador_data['polo'],
                     orientador_data['uf_instituicao'], orientador_data['lattes'], orientador_data['id']
                 ))
-                conn.commit()
+                conn.commit() # Salva as alterações no banco de dados
                 print("Orientador atualizado com sucesso.")
             except mysql.connector.Error as e:
                 print(f"Erro ao atualizar orientador: {e}")
@@ -576,20 +741,33 @@ class Database:
                 print(f"Chave ausente no dicionário: {e}")
 
     def get_prazos_by_pessoa_id(self, pessoa_id):
-            """Retorna todos os prazos de uma pessoa pelo ID."""
-            with mysql.connector.connect(**self.db_config) as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT id, fase_pesquisa, prazo_fase_pesquisa, prazo_dias, prazo_situacao, situacao_fase_pesquisa
-                    FROM prazos
-                    WHERE id_pessoa = %s
-                """, (pessoa_id,))
-                rows = cursor.fetchall()
-                columns = [column[0] for column in cursor.description]
-                return [dict(zip(columns, row)) for row in rows]
+        """
+        Retorna todos os prazos de uma pessoa pelo ID.
+
+        Args:
+            pessoa_id (int): O ID da pessoa.
+
+        Returns:
+            list: Uma lista de dicionários, onde cada dicionário representa um prazo.
+        """
+        with mysql.connector.connect(**self.db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, fase_pesquisa, prazo_fase_pesquisa, prazo_dias, prazo_situacao, situacao_fase_pesquisa
+                FROM prazos
+                WHERE id_pessoa = %s
+            """, (pessoa_id,))
+            rows = cursor.fetchall()
+            columns = [column[0] for column in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
 
     def inserir_prazo(self, prazo_data):
-        """Insere um novo prazo na tabela 'prazos'."""
+        """
+        Insere um novo prazo na tabela 'prazos'.
+
+        Args:
+            prazo_data (dict): Um dicionário contendo os dados do prazo a serem inseridos.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             
@@ -604,6 +782,7 @@ class Database:
             except (ValueError, TypeError):
                 prazo_dias = 0
 
+            # Insere os dados do prazo na tabela 'prazos'
             cursor.execute("""
                 INSERT INTO prazos (id_pessoa, fase_pesquisa, prazo_fase_pesquisa, prazo_dias, prazo_situacao, situacao_fase_pesquisa)
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -615,10 +794,15 @@ class Database:
                 prazo_data['prazo_situacao'],
                 prazo_data['situacao_fase_pesquisa']
             ))
-            conn.commit()
+            conn.commit() # Salva as alterações no banco de dados
 
     def atualizar_prazo(self, prazo_data):
-        """Atualiza um prazo existente na tabela 'prazos'."""
+        """
+        Atualiza um prazo existente na tabela 'prazos'.
+
+        Args:
+            prazo_data (dict): Um dicionário contendo os dados do prazo a serem atualizados, incluindo o ID do prazo.
+        """
         with mysql.connector.connect(**self.db_config) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -636,9 +820,9 @@ class Database:
                 prazo_data['prazo_dias'],
                 prazo_data['prazo_situacao'],
                 prazo_data['situacao_fase_pesquisa'],
-                prazo_data['id'], # Certifique-se de ter o ID do prazo a ser atualizado
+                prazo_data['id'], # ID do prazo a ser atualizado
             ))
-            conn.commit()
+            conn.commit() # Salva as alterações no banco de dados
 
     def excluir_prazo(self, prazo_id):
         """Exclui um prazo da tabela 'prazos' pelo ID."""
