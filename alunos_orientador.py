@@ -5,30 +5,49 @@ import flet as ft
 db = Database()
 
 def tela_alunos_orientador_logado(page: ft.Page, usuario):
+    """
+    Exibe a tela para o orientador visualizar e editar informações dos seus orientandos.
+
+    Args:
+        page (ft.Page): A página Flet atual.
+        usuario (str): O nome de usuário do orientador logado.
+    """
+
+    # Obtém a lista de cursos disponíveis no banco de dados
     cursos = db.get_curso()
 
+    # Obtém o nome do orientador logado a partir do seu usuário
     orientador = db.get_orientador_info_por_usuario(usuario)['nome']
+
+    # Obtém a lista de nomes dos alunos orientandos do orientador logado
     nomes_alunos = db.get_orientando(orientador)
 
+    # Define a função para carregar os dados do aluno selecionado no dropdown
     def carregar_dados_aluno_dropdown(e):
+        """Carrega os dados do aluno selecionado no dropdown para os campos da tela."""
         nome_aluno = dropdown_alunos.value
         if nome_aluno:
             preencher_campos(nome_aluno)
             botao_salvar.visible = False
             botao_atualizar_aluno.visible = True
-            page.update
+            page.update()
 
+    # Cria o dropdown para selecionar o aluno
     dropdown_alunos = ft.Dropdown(
         width=800,
         options=[ft.dropdown.Option(nome) for nome in nomes_alunos],
-        on_change=carregar_dados_aluno_dropdown,
+        on_change=carregar_dados_aluno_dropdown,  # Define a função a ser chamada quando o valor do dropdown mudar
         bgcolor="WHITE",
     )
 
+    # Define a função para preencher os campos da tela com as informações do aluno
     def preencher_campos(nome):
-        global aluno_id
-        aluno_info = db.get_pessoa_info(nome)
+        """Preenche os campos da tela com as informações do aluno."""
+        global aluno_id  # Define aluno_id como global para ser acessível em outras funções
+        aluno_info = db.get_pessoa_info(nome)  # Obtém as informações do aluno do banco de dados a partir do nome
+
         if aluno_info:
+            # Preenche os campos de texto com as informações do aluno
             nome_field.value = aluno_info["nome"]
             telefone_field.value = aluno_info["telefone"]
             email_field.value = aluno_info["email"]
@@ -54,39 +73,43 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
             linha_pesquisa_field.value = aluno_info["linha_pesquisa"]
             via_tcc_entregue_field.value = aluno_info["via_tcc_entregue"]
             aluno_id = aluno_info['id']
-            # LISTVIEW COM PRAZOS DO ALUNO
+
+            # Preenche a ListView com os prazos do aluno
             prazos_aluno = db.get_prazos_by_pessoa_id(aluno_info["id"])
             fases_prazos_listview.controls.clear()
             for prazo in prazos_aluno:
                 fase = prazo.get("fase_pesquisa", "N/A")
                 prazo_str = prazo.get("prazo_fase_pesquisa", "N/A")
                 fases_prazos_listview.controls.append(ft.ListTile(title=ft.Text(f"{fase}: {prazo_str}")))
-                    # DESABILITA A EDIÇÃO DOS CAMPOS
+
+            # Desabilita a edição dos campos
             for field in lista_textfields:
                 field.read_only = True
                 telefone_field.read_only = True
                 lattes_field.read_only = True
                 via_tcc_entregue_field.read_only = True
-            # VISIBILIDADE DOS BOTOES
+
+            # Define a visibilidade dos botões
             botao_atualizar_aluno.visible = True
             botao_salvar.visible = False
-            # VISIBILIDADE DOS TEXTFIELDS (Ativa)
+
+            # Define a visibilidade dos campos de texto (ativa)
             curso_field.visible = True
             polo_field.visible = True
             nivel_curso_field.visible = True
             vinculo_field.visible = True
             uf_instituicao_field.visible = True
             orientador_field.visible = True
+
             page.update()
 
-        col={"sm": 10, "md": 10},
-        bgcolor="WHITE"
-    # FUNÇÃO PARA LINK API WHATSAPP
+    # Função para abrir o WhatsApp com o número de telefone do aluno
     def abrir_whatsapp(telefone):
+        """Abre o WhatsApp Web com o número de telefone fornecido."""
         if telefone:
             page.launch_url(f"https://wa.me/55{telefone.replace(' ', '').replace('-', '')}")
 
-    # TEXTFIELDS
+    # Cria os campos de texto da tela
     nome_field = ft.TextField(label="Nome", width=800, height=50, read_only=True, bgcolor="WHITE")
     telefone_field = ft.TextField(label="Telefone (Com DDD, somente números)",width=650, height=75, read_only=True, max_length=11, col={"sm": 10, "md": 10},bgcolor="WHITE")
     telefone_icon = ft.IconButton(icon=ft.icons.PHONE,width=50,height=50,on_click=lambda e: abrir_whatsapp(telefone_field.value), tooltip="Abrir WhatsApp", col={"sm": 2, "md": 2})
@@ -115,9 +138,12 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
     via_tcc_entregue_field = ft.TextField(label="Via do TCC entregue", width=650, height=50, read_only=True, col={"sm": 10, "md": 10}, bgcolor="WHITE")
     via_tcc_entregue_icon = ft.IconButton(icon=ft.icons.LINK, width=50, height=50, on_click=lambda e: page.launch_url(via_tcc_entregue_field.value) if via_tcc_entregue_field.value else None, tooltip="Abrir Link da via do TCC entregue", col={"sm": 2, "md": 2})
     fases_prazos_listview = ft.ListView(height=100)
-    
+
+    # Função para habilitar a edição de alguns campos do aluno
     def atualizar_aluno(e):
-        global aluno_id
+        """Habilita a edição de campos específicos do aluno."""
+        global aluno_id  # Acessa a variável global
+
         if aluno_id:
             # Liberando campos para edição e definindo a cor de fundo como branca
             telefone_field.read_only = False
@@ -136,6 +162,7 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
             linha_pesquisa_field.bgcolor = ft.colors.WHITE
             email_field.read_only = False
             email_field.bgcolor = ft.colors.WHITE
+
             # Mantendo campos como somente leitura e definindo a cor de fundo como cinza claro
             nome_field.read_only = True
             nome_field.bgcolor = ft.colors.GREY_200
@@ -169,25 +196,27 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
             doc_compromisso_field.bgcolor = ft.colors.GREY_200
             situacao_matricula_field.read_only = True
             situacao_matricula_field.bgcolor = ft.colors.GREY_200
+
+            # Alterando a visibilidade dos botões
             botao_atualizar_aluno.visible = False
             botao_salvar.visible = True
             page.update()
 
+    # Função para abrir o diálogo de confirmação de atualização
     def save_aluno(e):
-        # Abre o diálogo de confirmação
+        """Abre o diálogo de confirmação de atualização de dados."""
         page.dialog = dlg_confirmacao_atualizar
         dlg_confirmacao_atualizar.open = True
         page.update()
 
-    # BOTÕES DE CRUD
-    ## ATUALIZAÇÃO
+    # Cria os botões de CRUD (apenas atualização neste caso)
     botao_atualizar_aluno = ft.ElevatedButton(text="Atualizar cadastro", width=180, height=40, bgcolor="#006BA0", color="WHITE", on_click=atualizar_aluno, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)), visible=False)
     botao_salvar = ft.ElevatedButton(text="Salvar", width=180, height=40,bgcolor="#006BA0", color="WHITE", on_click=save_aluno, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)), visible=False)
-    
-    # Listview com fases e prazos
+
+    # Cria a ListView para exibir as fases e os prazos do aluno
     fases_prazos_listview = ft.ListView(height=100)
 
-    # Diálogos de Confirmação
+    # Diálogo de confirmação para atualização de dados
     dlg_confirmacao_atualizar = ft.AlertDialog(
         modal=True,
         title=ft.Text("Confirmar Atualização"),
@@ -199,7 +228,9 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
         actions_alignment=ft.MainAxisAlignment.END,
     )
 
+    # Função para fechar o diálogo de confirmação de atualização
     def fechar_dialogo_atualizar(e):
+        """Fecha o diálogo de confirmação de atualização."""
         dlg_confirmacao_atualizar.open = False
 
         # Resetando a cor de fundo de todos os campos para branco
@@ -228,11 +259,17 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
         doc_compromisso_field.bgcolor = ft.colors.WHITE
         situacao_matricula_field.bgcolor = ft.colors.WHITE
 
+        # Preenche os campos com os dados do aluno selecionado no dropdown
         preencher_campos(dropdown_alunos.value)
+
         page.update()
 
+    # Função para atualizar os dados do aluno no banco de dados
     def atualizar_aluno_confirmado(e):
-        global aluno_id
+        """Atualiza os dados do aluno no banco de dados após a confirmação."""
+        global aluno_id  # Acessa a variável global
+
+        # Cria um dicionário com os dados do aluno a ser atualizado
         aluno_data = {
             "id": aluno_id,
             'perfil': 'Discente',
@@ -262,10 +299,10 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
             'via_tcc_entregue': via_tcc_entregue_field.value,
         }
 
-        # Obter os valores originais do aluno usando o NOME
+        # Obtém os valores originais do aluno do banco de dados usando o nome
         valor_original_dict = db.get_pessoa_info(nome_field.value)
 
-        # Gerar a string com as alterações para o log
+        # Gera uma string com as alterações para o log
         alteracoes = []
         for chave, valor in aluno_data.items():
             if chave != "id" and valor_original_dict:
@@ -273,23 +310,29 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
                 if valor != valor_original:
                     alteracoes.append(f"{chave}: {valor_original} -> {valor}")
 
+        # Cria a mensagem de log com as informações do aluno e as alterações
         log_mensagem = f"Aluno: {aluno_data['nome']}"
         if alteracoes:
             log_mensagem += f" - Alterações: {', '.join(alteracoes)}"
 
-        # Chamar o método de atualização da DAO
+        # Atualiza os dados do aluno no banco de dados
         db.update_pessoa(aluno_data)
-        db.registrar_log(usuario, "atualizar_aluno", log_mensagem)  # Registra o log com as alterações
 
+        # Registra o log da atualização
+        db.registrar_log(usuario, "atualizar_aluno", log_mensagem)
+
+        # Fecha o diálogo de confirmação
         dlg_confirmacao_atualizar.open = False
+
+        # Exibe uma mensagem de sucesso
         page.snack_bar = ft.SnackBar(ft.Text("Dados atualizados com sucesso!"))
         page.snack_bar.open = True
 
-        # VISIBILIDADE DOS BOTOES
+        # Define a visibilidade dos botões
         botao_atualizar_aluno.visible = True
         botao_salvar.visible = False
 
-        # VISIBILIDADE DOS TEXTFIELDS (Ativa)
+        # Define a visibilidade dos campos de texto (ativa)
         curso_field.visible = True
         polo_field.visible = True
         nivel_curso_field.visible = True
@@ -323,7 +366,9 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
         doc_compromisso_field.bgcolor = ft.colors.WHITE
         situacao_matricula_field.bgcolor = ft.colors.WHITE
 
+        # Preenche os campos com os dados do aluno selecionado no dropdown
         preencher_campos(nome_field.value)
+
         page.update()
 
     # Lista de textfields para ser inserido no container
@@ -358,8 +403,10 @@ def tela_alunos_orientador_logado(page: ft.Page, usuario):
         ft.ResponsiveRow(controls=[fases_prazos_listview], width=800),
     ]
 
+    # Título da seção
     nome_campo = ft.Text("DADOS CADASTRAIS - DISCENTE", size=16, color="#006BA0", font_family="Roboto", weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
 
+    # Container principal da tela
     container_alunos = ft.Container(
         expand=True,
         content=ft.Column( 
