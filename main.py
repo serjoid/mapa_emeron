@@ -344,7 +344,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             on_click=lambda _: page.launch_url(
-                "https://drive.google.com/file/d/1nMECqwpLlU1bOCnaJX9OuAYQ8S_lzdUf/view?usp=sharing"
+                "# INSIRA AQUI O LINK PARA O MANUAL DO SISTEMA"
             ),
         )
 
@@ -394,7 +394,7 @@ def main(page: ft.Page):
                     botao_alunos,
                     botao_relatorios,
                     botao_andamento_pesquisa,
-                    # botao_submissoes, # AGUARDA ORIENTAÇÕES DA DIREÇÃO
+                    botao_submissoes,
                     botao_cadastro,
                     botao_logs,
                     botao_alterar_senha,
