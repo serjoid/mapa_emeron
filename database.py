@@ -7,10 +7,10 @@ import datetime
 class Database:
     def __init__(self):
         self.db_config = {
-            'user': 'admin_mapa',       # substitua pelo seu usuário MySQL
-            'password': 'Zaq159rgn#',     # substitua pela sua senha MySQL
-            'host': 'localhost',         # substitua pelo host do seu servidor MySQL
-            'database': 'mapa_emeron'      # substitua pelo nome do seu banco de dados
+            'user': 'seu_usuario',       # substitua pelo seu usuário MySQL
+            'password': 'sua_senha',     # substitua pela sua senha MySQL
+            'host': 'seu_host',         # substitua pelo host do seu servidor MySQL
+            'database': 'seu_banco_de_dados'      # substitua pelo nome do seu banco de dados
         }
 
     def get_db_assistente(self):
