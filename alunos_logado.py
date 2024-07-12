@@ -12,16 +12,18 @@ def tela_alunos_logado(page: ft.Page, usuario):
         page (ft.Page): A página Flet atual.
         usuario (str): O nome de usuário do aluno logado.
     """
-    global aluno_id  # Define aluno_id como global aqui
+    global aluno_id  # Define aluno_id como global para ser acessado em outras funções
+
     # Obtém as informações do aluno logado do banco de dados
     aluno_info = db.get_pessoa_info_por_usuario(usuario)
 
+    # Verifica se o aluno foi encontrado no banco de dados
     if not aluno_info:
-        # Se o aluno não for encontrado, exiba uma mensagem de erro
+        # Se o aluno não for encontrado, exibe uma mensagem de erro
         page.add(ft.Text("Erro: Aluno não encontrado."))
         return
 
-    # Extrai as informações do aluno
+    # Extrai as informações do aluno do dicionário aluno_info
     aluno_id = aluno_info['id']
     nome_aluno = aluno_info['nome']
     telefone = aluno_info['telefone']
@@ -48,15 +50,15 @@ def tela_alunos_logado(page: ft.Page, usuario):
     linha_pesquisa = aluno_info['linha_pesquisa']
     via_tcc_entregue = aluno_info['via_tcc_entregue']
 
-    # Mensagem para o aluno
+    # Cria uma mensagem para o aluno informando sobre como alterar outros dados cadastrais
     mensagem_aluno = ft.Text(
         "Em caso de necessidade de alteração cadastral, além dos dados de contato, contactar o orientador ou coordenador do curso.",
         width=800,
-        text_align=ft.TextAlign.CENTER, # Centraliza o texto
+        text_align=ft.TextAlign.CENTER,
         style=ft.TextStyle(weight=ft.FontWeight.BOLD)
     )
 
-    # Crie os TextFields para exibir as informações do aluno
+    # Cria os TextFields para exibir as informações do aluno
     nome_field = ft.TextField(label="Nome", width=800, height=50, value=nome_aluno, read_only=True, bgcolor="WHITE")
     telefone_field = ft.TextField(
         label="Telefone (Com DDD, somente números)", width=800, height=75, value=telefone, read_only=True, max_length=11, bgcolor="WHITE")
@@ -83,8 +85,7 @@ def tela_alunos_logado(page: ft.Page, usuario):
     linha_pesquisa_field = ft.TextField(label="Linha de pesquisa", width=800, height=50, value=linha_pesquisa, read_only=True, bgcolor="WHITE")
     via_tcc_entregue_field = ft.TextField(label="Via TCC entregue", width=800, height=50, value=via_tcc_entregue, read_only=True, bgcolor="WHITE")
 
-
-    # Diálogos de Confirmação
+    # Diálogo de confirmação para atualização de dados
     dlg_confirmacao_atualizar = ft.AlertDialog(
         modal=True,
         title=ft.Text("Confirmar Atualização"),
@@ -96,19 +97,25 @@ def tela_alunos_logado(page: ft.Page, usuario):
         actions_alignment=ft.MainAxisAlignment.END,
     )
 
+    # Função para fechar o diálogo de confirmação de atualização
     def fechar_dialogo_atualizar(e):
+        """Fecha o diálogo de confirmação de atualização."""
         dlg_confirmacao_atualizar.open = False
         page.update()
 
+    # Função para habilitar a edição de telefone e email
     def atualizar_aluno(e):
-        global aluno_id
+        """Habilita a edição dos campos de telefone e email do aluno."""
+        global aluno_id  # Acessa a variável global
+
         if aluno_id:
-            # Habilita a edição de telefone e email
+            # Habilita a edição dos campos de telefone e email
             telefone_field.read_only = False
             email_field.read_only = False
             telefone_field.update()
             email_field.update()
-            # Oculta os campos que não devem ser editados
+
+            # Oculta os campos que não devem ser editados pelo aluno
             orientador_field.visible = False
             curso_field.visible = False
             nivel_curso_field.visible = False
@@ -131,21 +138,26 @@ def tela_alunos_logado(page: ft.Page, usuario):
             linha_pesquisa_field.visible = False
             via_tcc_entregue_field.visible = False
             mensagem_aluno.visible = False
+
             # Altera a visibilidade dos botões
             botao_atualizar_aluno.visible = False
             botao_salvar.visible = True
             page.update()
             botoes.update()
 
+    # Função para abrir o diálogo de confirmação de atualização
     def save_aluno(e):
-        # Abre o diálogo de confirmação
+        """Abre o diálogo de confirmação de atualização de dados."""
         page.dialog = dlg_confirmacao_atualizar
         dlg_confirmacao_atualizar.open = True
         page.update()
 
+    # Função para atualizar os dados do aluno no banco de dados
     def atualizar_aluno_confirmado(e):
-        global aluno_id
-        # Coletar dados dos TextField
+        """Atualiza os dados do aluno no banco de dados após a confirmação."""
+        global aluno_id  # Acessa a variável global
+
+        # Coleta os dados dos TextFields
         aluno_data = {
             'id': aluno_id,
             'perfil': 'Discente',
@@ -174,10 +186,17 @@ def tela_alunos_logado(page: ft.Page, usuario):
             'linha_pesquisa': linha_pesquisa_field.value,
             'via_tcc_entregue': via_tcc_entregue_field.value,
         }
-        # Chamar o método de atualização da DAO
+
+        # Atualiza os dados do aluno no banco de dados
         db.update_pessoa(aluno_data)
-        db.registrar_log(usuario, "atualizar_aluno", f"Aluno: {aluno_data['nome']}") # Registra o log de atualização
+        
+        # Registra a ação no log do sistema
+        db.registrar_log(usuario, "atualizar_aluno", f"Aluno: {aluno_data['nome']}")
+
+        # Fecha o diálogo de confirmação
         dlg_confirmacao_atualizar.open = False
+
+        # Exibe uma mensagem de sucesso ao usuário
         page.snack_bar = ft.SnackBar(ft.Text("Dados atualizados com sucesso!"))
         page.snack_bar.open = True
         page.update()
@@ -186,7 +205,7 @@ def tela_alunos_logado(page: ft.Page, usuario):
         telefone_field.read_only = True
         email_field.read_only = True
 
-        # Torna os campos visíveis novamente
+        # Torna os campos ocultos visíveis novamente
         orientador_field.visible = True
         curso_field.visible = True
         nivel_curso_field.visible = True
@@ -216,7 +235,7 @@ def tela_alunos_logado(page: ft.Page, usuario):
         page.update()
         botoes.update()
 
-    # Botões
+    # Botões para atualizar e salvar dados
     botao_atualizar_aluno = ft.ElevatedButton(
         text="Atualizar dados",
         width=200,
@@ -238,6 +257,7 @@ def tela_alunos_logado(page: ft.Page, usuario):
         visible=False
     )
 
+    # Container para os botões
     botoes = ft.Container(
         width=800,
         content=ft.ResponsiveRow(
@@ -249,44 +269,47 @@ def tela_alunos_logado(page: ft.Page, usuario):
         )
     )
 
+    # Título da seção
     nome_campo = ft.Text("DADOS CADASTRAIS - DISCENTE", size=16, color="#006BA0", font_family="Roboto", weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
 
+    # Container principal com todos os elementos da tela
     container_alunos = ft.Container(
         expand=True,
         content=ft.Column( 
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             scroll=ft.ScrollMode.ALWAYS,
             controls=[
-                nome_campo,
-                ft.Divider(),
-                mensagem_aluno, 
-                botoes,
-                nome_field, 
-                telefone_field, 
-                email_field, 
-                orientador_field, 
-                curso_field,
-                nivel_curso_field, 
-                ano_ingresso_field, 
-                ano_conclusao_field, 
-                situacao_field,
-                instituicao_field, 
-                tipo_tcc_field,
-                tema_field, 
-                bolsa_field,
-                tipo_bolsa_field,
-                vinculo_field,
-                polo_field,
-                matricula_field, 
-                doc_compromisso_field,
-                uf_instituicao_field, 
-                lattes_field,
-                situacao_matricula_field, 
-                grupo_pesquisa_field, 
-                linha_pesquisa_field, 
-                via_tcc_entregue_field
+                nome_campo,  # Título da seção
+                ft.Divider(),  # Divisor visual
+                mensagem_aluno,  # Mensagem informativa para o aluno
+                botoes,  # Container com os botões de ação
+                nome_field,  # Campo de texto para o nome
+                telefone_field,  # Campo de texto para o telefone
+                email_field,  # Campo de texto para o email
+                orientador_field,  # Campo de texto para o orientador
+                curso_field,  # Campo de texto para o curso
+                nivel_curso_field,  # Campo de texto para o nível do curso
+                ano_ingresso_field,  # Campo de texto para o ano de ingresso
+                ano_conclusao_field,  # Campo de texto para o ano de conclusão
+                situacao_field,  # Campo de texto para a situação do aluno
+                instituicao_field,  # Campo de texto para a instituição
+                tipo_tcc_field,  # Campo de texto para o tipo de TCC
+                tema_field,  # Campo de texto para o tema do TCC
+                bolsa_field,  # Campo de texto para a bolsa
+                tipo_bolsa_field,  # Campo de texto para o tipo de bolsa
+                vinculo_field,  # Campo de texto para o vínculo
+                polo_field,  # Campo de texto para o polo
+                matricula_field,  # Campo de texto para a matrícula
+                doc_compromisso_field,  # Campo de texto para o documento de compromisso
+                uf_instituicao_field,  # Campo de texto para a UF da instituição
+                lattes_field,  # Campo de texto para o Lattes
+                situacao_matricula_field,  # Campo de texto para a situação da matrícula
+                grupo_pesquisa_field,  # Campo de texto para o grupo de pesquisa
+                linha_pesquisa_field,  # Campo de texto para a linha de pesquisa
+                via_tcc_entregue_field  # Campo de texto para a via do TCC entregue
             ]
         ), margin=ft.margin.only(bottom=50)
     )
 
+    # Retorna o container principal da tela
     return container_alunos
